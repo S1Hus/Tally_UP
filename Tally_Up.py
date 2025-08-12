@@ -28,7 +28,7 @@ class GridGame():
         self.message_label.grid(row=GRID_SIZE + 1, column=0, columnspan=GRID_SIZE)
 
         self.generated_selections = []
-        self.generated_neighbours = []
+        self.generated_directions = []
 
         self.build_grid()
         self.generate_path()
@@ -36,16 +36,16 @@ class GridGame():
     def build_grid(self):
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
-                btn = tk.Button(self.window, text=str(self.grid[i][j]), font=("Arial", 20),
-                                width=4, height=2, command=lambda x=i, y=j: self.cell_clicked(x, y))
+                btn = tk.Button(self.window, text=str(self.grid[j][i]), font=("Arial", 20),
+                                width=4, height=2, command=lambda x=j, y=i: self.cell_clicked(x, y))
                 btn.grid(row=i, column=j, padx=2, pady=2)
-                self.buttons[i][j] = btn
+                self.buttons[j][i] = btn
 
     def generate_path(self): 
         left = (-1,0)
         right = (1,0)
-        up = (0,1)
-        down = (0,-1)
+        up = (0,-1)
+        down = (0,1)
 
         direction = [left,right,up,down]
         for _ in range(random.randint(ITERATIONS_MIN, ITERATIONS_MAX)):
@@ -72,7 +72,7 @@ class GridGame():
 
             neighbours = [i for i in direction if i not in illegal_neighbour]
             self.generated_selections.append(cell)
-            self.generated_neighbours.append(random.choice(neighbours))
+            self.generated_directions.append(random.choice(neighbours))
 
     def cell_clicked(self, x, y):
         self.selection.append((x, y))
