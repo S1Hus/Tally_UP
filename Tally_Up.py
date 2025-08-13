@@ -1,5 +1,6 @@
 import tkinter as tk
 import random
+import copy
 
 GRID_SIZE = 4
 ITERATIONS_MAX = 64
@@ -23,15 +24,20 @@ class GridGame():
                 self.buttons.append([None] * GRID_SIZE) 
 
         self.selection = []
-        
         self.message_label = tk.Label(window, text="", font=("Arial", 12))
         self.message_label.grid(row=GRID_SIZE + 1, column=0, columnspan=GRID_SIZE)
 
         self.generated_selections = []
         self.generated_directions = []
+        self.next_value = []
+
+        self.target = []
+        self.target_label = tk.Label(window, text="", font=("Arial", 12))
+        self.target_label.grid(row=GRID_SIZE + 2, column=0, columnspan=GRID_SIZE)
 
         self.build_grid()
         self.generate_path()
+        self.generate_target()
 
     def build_grid(self):
         for i in range(GRID_SIZE):
@@ -62,7 +68,7 @@ class GridGame():
                 if (x != 0 and y == 0):
                     illegal_neighbour += [up]
 
-            if (0 == 3 or y == 3):
+            if (x == 3 or y == 3):
                 if (x == 3 and y == 3):
                     illegal_neighbour += [right, down]
                 if (x == 3 and y != 3):
@@ -72,7 +78,35 @@ class GridGame():
 
             neighbours = [i for i in direction if i not in illegal_neighbour]
             self.generated_selections.append(cell)
-            self.generated_directions.append(random.choice(neighbours))
+            self.generated_directions.append(random.choice(neighbours))        
+            self.next_value.append(random.randint(1,3))
+
+    def generate_target(self):
+        cp_grid = copy.deepcopy(self.grid)
+        cp_selection = copy.deepcopy(self.generated_selections)
+        cp_direction = copy.deepcopy(self.generated_directions)
+        cp_value = copy.deepcopy(self.next_value)
+
+        target = 1
+
+        for _ in range(len(cp_selection)):
+            selected = cp_selection.pop(0)
+            direction = cp_direction.pop(0)
+            value = cp_value.pop(0)
+
+            (x1, y1) = selected
+            (dir_x, dir_y) = direction
+
+            (x2, y2) = (x1 + dir_x, y1 + dir_y)
+
+            cp_grid[x2][y2] += cp_grid[x1][y1]
+            cp_grid[x1][y1] = value
+
+            if (cp_grid[x2][y2] > target):
+                target = cp_grid[x2][y2] 
+
+        self.target = target
+        self.target_label.config(text=f"your target is {self.target}", fg="black")
 
     def cell_clicked(self, x, y):
         self.selection.append((x, y))
@@ -98,6 +132,9 @@ class GridGame():
 
         self.grid[x2][y2] += self.grid[x1][y1]
         self.grid[x1][y1] = random.randint(1, 3)
+
+        if (self.grid[x2][y2] == self.target):
+            self.target_label.config(text="You win!!", fg="green")
 
         self.update_grid()
         self.clear_selection()
