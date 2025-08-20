@@ -12,6 +12,11 @@ class GridGame():
         self.window = window
         self.window.title("Tally_UP")
 
+        self.new_game = tk.Button(self.window, text="new game", width=8, height=2, command=lambda : self.reset_game())
+        self.new_game.grid(row=0, column=0, columnspan=GRID_SIZE)
+        self.build_game()
+
+    def build_game(self):
         self.grid = []
         for _ in range(GRID_SIZE):
             row = []
@@ -25,15 +30,15 @@ class GridGame():
 
         self.selection = []
         self.message_label = tk.Label(window, text="", font=("Arial", 12))
-        self.message_label.grid(row=GRID_SIZE + 1, column=0, columnspan=GRID_SIZE)
+        self.message_label.grid(row=GRID_SIZE + 101, column=0, columnspan=GRID_SIZE)
 
         self.generated_selections = []
         self.generated_directions = []
         self.next_value = []
-
         self.target = []
+
         self.target_label = tk.Label(window, text="", font=("Arial", 12))
-        self.target_label.grid(row=GRID_SIZE + 2, column=0, columnspan=GRID_SIZE)
+        self.target_label.grid(row=2, column=0, columnspan=GRID_SIZE)
 
         self.build_grid()
         self.generate_path()
@@ -44,7 +49,7 @@ class GridGame():
             for j in range(GRID_SIZE):
                 btn = tk.Button(self.window, text=str(self.grid[j][i]), font=("Arial", 20),
                                 width=4, height=2, command=lambda x=j, y=i: self.cell_clicked(x, y))
-                btn.grid(row=i, column=j, padx=2, pady=2)
+                btn.grid(row=i+100, column=j, padx=2, pady=2)
                 self.buttons[j][i] = btn
 
     def generate_path(self): 
@@ -135,6 +140,7 @@ class GridGame():
 
         if (self.grid[x2][y2] == self.target):
             self.target_label.config(text="You win!!", fg="green")
+            return
 
         self.update_grid()
         self.clear_selection()
@@ -148,6 +154,11 @@ class GridGame():
         for x, y in self.selection:
             self.buttons[x][y].config(bg="lightgray")
         self.selection.clear()
+
+    def reset_game(self):
+        #clear all values
+        # call build_game()
+        self.build_game()
 
 if __name__ == "__main__":
     window = tk.Tk()
