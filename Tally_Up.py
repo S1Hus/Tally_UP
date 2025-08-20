@@ -29,7 +29,7 @@ class GridGame():
                 self.buttons.append([None] * GRID_SIZE) 
 
         self.selection = []
-        self.message_label = tk.Label(window, text="", font=("Arial", 12))
+        self.message_label = tk.Label(self.window, text="", font=("Arial", 12))
         self.message_label.grid(row=GRID_SIZE + 101, column=0, columnspan=GRID_SIZE)
 
         self.generated_selections = []
@@ -37,7 +37,7 @@ class GridGame():
         self.next_value = []
         self.target = []
 
-        self.target_label = tk.Label(window, text="", font=("Arial", 12))
+        self.target_label = tk.Label(self.window, text="", font=("Arial", 12))
         self.target_label.grid(row=2, column=0, columnspan=GRID_SIZE)
 
         self.build_grid()
@@ -51,7 +51,7 @@ class GridGame():
                                 width=4, height=2, command=lambda x=j, y=i: self.cell_clicked(x, y))
                 btn.grid(row=i+100, column=j, padx=2, pady=2)
                 self.buttons[j][i] = btn
-
+    
     def generate_path(self): 
         left = (-1,0)
         right = (1,0)
@@ -141,7 +141,7 @@ class GridGame():
         if (self.grid[x2][y2] == self.target):
             self.target_label.config(text="You win!!", fg="green")
             return
-
+        
         self.update_grid()
         self.clear_selection()
 
@@ -156,8 +156,7 @@ class GridGame():
         self.selection.clear()
 
     def reset_game(self):
-        #clear all values
-        # call build_game()
+        self.target_label.config(text="")
         self.build_game()
 
 if __name__ == "__main__":
