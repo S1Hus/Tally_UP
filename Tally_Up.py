@@ -12,8 +12,8 @@ class GridGame():
         self.window = window
         self.window.title("Tally_UP")
 
-        self.new_game = tk.Button(self.window, text="new game", width=8, height=2, command=lambda : self.reset_game())
-        self.new_game.grid(row=0, column=0, columnspan=GRID_SIZE)
+        self.new_game_btn = tk.Button(self.window, text="new game", width=8, height=2, command=lambda : self.reset_game())
+        self.new_game_btn.grid(row=0, column=0, columnspan=GRID_SIZE)
         self.build_game()
 
     def build_game(self):
@@ -136,7 +136,7 @@ class GridGame():
         self.message_label.config(text="")
 
         self.grid[x2][y2] += self.grid[x1][y1]
-        self.grid[x1][y1] = random.randint(1, 3)
+        self.grid[x1][y1] = self.next_value.pop(0)
 
         if (self.grid[x2][y2] == self.target):
             self.target_label.config(text="You win!!", fg="green")
