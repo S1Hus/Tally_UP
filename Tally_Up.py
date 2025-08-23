@@ -6,14 +6,16 @@ GRID_SIZE = 4
 ITERATIONS_MAX = 64
 ITERATIONS_MIN = 16
 CELL_POSITION = [(0,0),(0,1),(0,2),(0,3),(1,0),(1,1),(1,2),(1,3),(2,0),(2,1),(2,2),(2,3),(3,0),(3,1),(3,2),(3,3)] 
+SET = [1,2,3,'-','*','x2']
+WEIGHT = [0.25,0.30,0.30,0.05,0.05,0.05]
 
 class GridGame():
     def __init__(self, window):
         self.window = window
         self.window.title("Tally_UP")
 
-        self.new_game = tk.Button(self.window, text="new game", width=8, height=2, command=lambda : self.reset_game())
-        self.new_game.grid(row=0, column=0, columnspan=GRID_SIZE)
+        self.new_game_btn = tk.Button(self.window, text="new game", width=8, height=2, command=lambda : self.reset_game())
+        self.new_game_btn.grid(row=0, column=0, columnspan=GRID_SIZE)
         self.build_game()
 
     def build_game(self):
@@ -21,7 +23,7 @@ class GridGame():
         for _ in range(GRID_SIZE):
             row = []
             for _ in range(GRID_SIZE):
-                row.append(random.randint(1,3))
+                row.append(random.choices(SET,WEIGHT)[0])
             self.grid.append(row)
 
         self.buttons = []
@@ -84,7 +86,7 @@ class GridGame():
             neighbours = [i for i in direction if i not in illegal_neighbour]
             self.generated_selections.append(cell)
             self.generated_directions.append(random.choice(neighbours))        
-            self.next_value.append(random.randint(1,3))
+            self.next_value.append(random.choices(SET,WEIGHT)[0]) 
 
     def generate_target(self):
         cp_grid = copy.deepcopy(self.grid)
@@ -104,11 +106,15 @@ class GridGame():
 
             (x2, y2) = (x1 + dir_x, y1 + dir_y)
 
-            cp_grid[x2][y2] += cp_grid[x1][y1]
-            cp_grid[x1][y1] = value
-
-            if (cp_grid[x2][y2] > target):
-                target = cp_grid[x2][y2] 
+            result = self.operator_logic((cp_grid[x1][y1]),(cp_grid[x2][y2]), False)
+            if result == "illegal operation":
+                pass
+            else:
+                cp_grid[x2][y2] = result
+                cp_grid[x1][y1] = value
+                
+                if (type(result) == int) and (result > target):
+                    target = result
 
         self.target = target
         self.target_label.config(text=f"your target is {self.target}", fg="black")
@@ -128,22 +134,90 @@ class GridGame():
             return
 
         if abs(x2 - x1) + abs(y2 - y1) != 1:
-        #if abs(x2 - x1) | abs(y2 - y1) > 1: # logic to include diagonals 
             self.message_label.config(text="x Please select an adjacent cell", fg="red")
             self.clear_selection()
             return
 
         self.message_label.config(text="")
 
-        self.grid[x2][y2] += self.grid[x1][y1]
-        self.grid[x1][y1] = random.randint(1, 3)
+        result = self.operator_logic((self.grid[x1][y1]),(self.grid[x2][y2]), True)
+        if result == "illegal operation":
+            pass
+        else:
+            self.grid[x2][y2] = result
 
-        if (self.grid[x2][y2] == self.target):
-            self.target_label.config(text="You win!!", fg="green")
-            return
-        
-        self.update_grid()
+            self.grid[x1][y1] = self.next_value.pop(0) if len(self.next_value) > 0  else random.choices(SET,WEIGHT)[0]
+
+            if (self.grid[x2][y2] == self.target):
+                self.target_label.config(text="You win!!", fg="green")
+                return
+            self.update_grid()
         self.clear_selection()
+
+    def operator_logic(self, cell_1, cell_2, user_move):
+        if type(cell_1) == str and type(cell_2) == str:
+
+            if cell_1 == '*' and cell_2 == '*':
+                return('^2')
+            elif cell_1.startswith('x') and cell_2.startswith('x'):
+                a = int(cell_1[1:])
+                b = int(cell_2[1:])
+
+                if (a*b) > 0 and (a*b) < 16:
+                    result = 'x' + str(a*b)
+                    return(result)
+                else:
+                    if user_move == True:
+                        self.message_label.config(text="multipler out of range: 0 to 16", fg="red") 
+                    return("illegal operation")
+            else:
+                if user_move == True:
+                    self.message_label.config(text="Illegal Operation", fg="red")
+                return("illegal operation")
+                
+
+        elif type(cell_1) == int and type(cell_2) == str:
+
+            if cell_2.startswith('x'):
+                a = int(cell_2[1:])
+                result = a*cell_1
+                return(result)
+            if cell_2 == '*':
+                if (cell_1 < 0 or cell_1 > 16) and user_move == True:
+                    self.message_label.config(text="multipler out of range: 0 to 16", fg="red")
+                    return("illegal operation")
+
+                result = 'x' + str(cell_1)
+                return(result)
+            if cell_2 == '^2':
+                result = cell_1*cell_1
+                return(result)
+            if cell_2 == '-':
+                result = -cell_1
+                return(result)
+
+        elif type(cell_1) == str and type(cell_2) == int:
+
+            if cell_1.startswith('x'):
+                a = int(cell_1[1:])
+                result = a*cell_2
+                return(result)
+            if cell_1 == '*':
+                if (cell_2 < 0 or cell_2 > 16) and user_move == True:
+                    self.message_label.config(text="multipler out of range: 0 to 16", fg="red")
+                    return("illegal operation")
+                result = 'x' + str(cell_2)
+                return(result)
+            if cell_1 == '^2':
+                result = cell_2*cell_2
+                return(result)
+            if cell_1 == '-':
+                result = -cell_2
+                return(result)
+
+        else:
+            result = cell_1+cell_2
+            return(result)
 
     def update_grid(self):
         for i in range(GRID_SIZE):
