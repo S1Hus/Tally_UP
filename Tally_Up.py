@@ -152,7 +152,7 @@ class GridGame():
                 self.target_label.config(text="You win!!", fg="green")
                 return
             self.update_grid()
-            self.clear_selection()
+        self.clear_selection()
 
     def operator_logic(self, cell_1, cell_2, user_move):
         if type(cell_1) == str and type(cell_2) == str:
@@ -167,13 +167,14 @@ class GridGame():
                     result = 'x' + str(a*b)
                     return(result)
                 else:
-                    self.message_label.config(text="multipler out of range: 0 to 16", fg="red")
-                    self.clear_selection()
+                    if user_move == True:
+                        self.message_label.config(text="multipler out of range: 0 to 16", fg="red") 
                     return("illegal operation")
             else:
-                self.message_label.config(text="Illegal Operation", fg="red")
-                self.clear_selection()
+                if user_move == True:
+                    self.message_label.config(text="Illegal Operation", fg="red")
                 return("illegal operation")
+                
 
         elif type(cell_1) == int and type(cell_2) == str:
 
